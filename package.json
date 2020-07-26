@@ -1,0 +1,39 @@
+{
+  "name": "flight-system",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/rafaewaqarqazi/flight-system-client.git",
+  "author": "rafaewaqarqazi <rafaewaqar@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "server": "nodemon app.js",
+    "start:client": "npm start --prefix ../flight-system-client",
+    "start:server": "nodemon app.js",
+    "start": "node server.js",
+    "dev": "npm-run-all --parallel start:*"
+  },
+  "dependencies": {
+    "compression": "1.7.4",
+    "cookie-parser": "1.4.4",
+    "cors": "2.8.5",
+    "cron": "^1.8.2",
+    "cross-env": "5.2.1",
+    "dotenv": "8.0.0",
+    "express": "4.17.1",
+    "express-jwt": "5.3.1",
+    "generate-password": "^1.5.1",
+    "js-cookie": "2.2.0",
+    "jsonwebtoken": "8.5.1",
+    "lodash": "4.17.15",
+    "moment": "2.24.0",
+    "mongoose": "5.6.5",
+    "morgan": "1.9.1",
+    "multer": "1.4.2",
+    "natural": "^2.1.5",
+    "nodemailer": "6.3.0",
+    "nodemon": "1.19.1",
+    "npm-run-all": "^4.1.5",
+    "socket.io": "^2.3.0",
+    "uuid": "3.3.2"
+  }
+}
