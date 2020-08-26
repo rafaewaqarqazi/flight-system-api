@@ -1,5 +1,4 @@
 const User = require('../models/users');
-const Cases = require('../models/cases');
 const fs = require('fs');
 const natural = require('natural');
 const {sendEmail} = require("../helpers");

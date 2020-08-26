@@ -2,11 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const AuthRouter = require('./routes/auth');
 const userRouter = require('./routes/users');
-const casesRouter = require('./routes/cases');
+const flightRouter = require('./routes/flight');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
-const cronJob = require('./helpers/cronJobs')
 const http = require('http')
 const socketio = require('socket.io')
 
@@ -22,7 +21,6 @@ const io = socketio(server)
 //Socket.io
 
 io.on('connection', handleSocket);
-cronJob.start()
 
 app.use(compression())
 // dotenv.config();
@@ -47,7 +45,7 @@ app.use(cookieParser());
 //Routes
 app.use('/api/auth', AuthRouter);
 app.use('/api/users', userRouter);
-app.use('/api/cases', casesRouter);
+app.use('/api/flights', flightRouter);
 //Unauthorized Handler
 app.use(function (err, req, res, next) {
   if (err.name === 'UnauthorizedError') {
