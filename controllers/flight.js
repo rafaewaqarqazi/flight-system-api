@@ -14,7 +14,7 @@ exports.getOneWayFlights = async (req, res) => {
     const {origin, destination, depart, adults, child} = req.query
     let adultsArray = []
     let childArray = []
-    for (let i = 0; i <= adults; i++) {
+    for (let i = 0; i < adults; i++) {
       adultsArray = [...adultsArray,  {
         "id": i,
         "travelerType": "ADULT",
@@ -23,7 +23,7 @@ exports.getOneWayFlights = async (req, res) => {
         ]
       }]
     }
-    for (let i = 0; i <= child; i++) {
+    for (let i = 0; i < child; i++) {
       childArray = [...childArray,  {
         "id": adults + i + 1,
         "travelerType": "CHILD",
