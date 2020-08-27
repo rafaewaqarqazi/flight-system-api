@@ -57,8 +57,7 @@ exports.getOneWayFlights = async (req, res) => {
       }
     }))
       .then(function(response){
-       res.json({ countries: response.data})
-      console.log(response.data);
+       res.json({ flights: response.data})
     }).catch(function(responseError){
       res.json({responseError})
     });
@@ -126,8 +125,24 @@ exports.getTwoWayFlights = async (req, res) => {
     }))
 
       .then(function(response){
-       res.json({ countries: response.data})
-      console.log(response.data);
+       res.json({ flights: response.data})
+    }).catch(function(responseError){
+      res.json({responseError})
+    });
+
+  } catch (e) {
+    await res.json({error: e.message})
+  }
+}
+
+exports.getAirline = async (req, res) => {
+  try {
+    const {airlineCodes} = req.query
+    amadeus.referenceData.airlines.get({
+      airlineCodes
+    })
+      .then(function(response){
+       res.json({ airline: response.data})
     }).catch(function(responseError){
       res.json({responseError})
     });
