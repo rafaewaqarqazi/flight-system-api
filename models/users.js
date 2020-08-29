@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const uuidv1 = require('uuid/v1');
-const crypto = require('crypto');
-const {ObjectId} = mongoose.Schema;
+const mongoose = require("mongoose");
+const uuidv1 = require("uuid/v1");
+const crypto = require("crypto");
+const { ObjectId } = mongoose.Schema;
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -28,64 +28,47 @@ const userSchema = new mongoose.Schema({
     default: Date.now()
   },
   updatedAt: Date,
-  role: String,
   address: String,
   country: String,
+  role: { type: String, default: "1" },
   resetPasswordLink: String,
   mobileNo: String,
   admin_details: {},
   profileImage: {
     filename: String
-  },
-  client_details: {},
-  lawyer_details: {
-    lawSchool: String,
-    practiceAreas: [],
-    bio: String,
-    ratings: {
-      type: String,
-      default: '0'
-    },
-    reviews: [{
-      text: String,
-      rating: String,
-      reviewedBy: {type: ObjectId, ref: "Users"}
-    }],
-    canHire: [],
   }
 });
 
-
-userSchema.virtual("password")
-  .set(function (password) {
+userSchema
+  .virtual("password")
+  .set(function(password) {
     this._password = password;
     //generate a timestamp
     this.salt = uuidv1();
 
     this.hashed_password = this.encryptPassword(password);
   })
-  .get(function () {
+  .get(function() {
     return this.password;
   });
-
 
 //methods
 
 userSchema.methods = {
-  authenticate: function (plainText) {
+  authenticate: function(plainText) {
     return this.encryptPassword(plainText) === this.hashed_password;
   },
-  encryptPassword: function (password) {
-    if (!password)
-      return "";
+  encryptPassword: function(password) {
+    if (!password) return "";
     try {
-      return crypto.createHmac('sha1', this.salt)
+      return crypto
+        .createHmac("sha1", this.salt)
         .update(password)
-        .digest('hex');
+        .digest("hex");
     } catch (err) {
       return "";
     }
   }
 };
-userSchema.index({"lawyer_details.bio": "text"})
-module.exports = mongoose.model('Users', userSchema);
+userSchema.index({ "lawyer_details.bio": "text" });
+module.exports = mongoose.model("Users", userSchema);
