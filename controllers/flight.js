@@ -72,7 +72,7 @@ exports.getTwoWayFlights = async (req, res) => {
     const {origin, destination, depart, returnDate, adults, child} = req.query
     let adultsArray = []
     let childArray = []
-    for (let i = 0; i <= adults; i++) {
+    for (let i = 0; i < adults; i++) {
       adultsArray = [...adultsArray,  {
         "id": i,
         "travelerType": "ADULT",
@@ -81,7 +81,7 @@ exports.getTwoWayFlights = async (req, res) => {
         ]
       }]
     }
-    for (let i = 0; i <= child; i++) {
+    for (let i = 0; i < child; i++) {
       childArray = [...childArray,  {
         "id": adults + i + 1,
         "travelerType": "CHILD",
@@ -143,6 +143,22 @@ exports.getAirline = async (req, res) => {
     })
       .then(function(response){
        res.json({ airline: response.data})
+    }).catch(function(responseError){
+      res.json({responseError})
+    });
+
+  } catch (e) {
+    await res.json({error: e.message})
+  }
+}
+exports.getRecommended = async (req, res) => {
+  try {
+    amadeus.referenceData.recommendedLocations.get({
+      cityCodes: 'ISB,LHE,KHI',
+      travelerCountryCode: 'FR'
+    })
+      .then(function(response){
+       res.json({ recommended:response.data})
     }).catch(function(responseError){
       res.json({responseError})
     });
