@@ -9,7 +9,8 @@ const {
   bookFlight,
   getUserTrips,
   getAllTrips,
-  changeFlightStatus
+  changeFlightStatus,
+  confirmFlight
 } = require("../controllers/flight");
 const upload = require("../upload");
 const { requireSignin } = require("../controllers/auth");
@@ -23,4 +24,5 @@ router.get("/user-trips/:userId", getUserTrips);
 router.get("/all-trips", getAllTrips);
 router.post("/book", bookFlight);
 router.put("/status", changeFlightStatus);
+router.post("/confirm", confirmFlight);
 module.exports = router;

@@ -2,7 +2,9 @@ const { airports } = require("../helpers/airports");
 const Flights = require("../models/flights");
 const mongoose = require("mongoose");
 const Amadeus = require("amadeus");
-
+const stripe = require("stripe")(
+  "sk_test_51HLtFDCzlUjqqV4cO1V60KQw15iwJxRaMiFCXVjEtR6GKVig7diKM9JS86ILjg2hI0Ohwam6VLWWjZB9jMhiww9o00TF8pP1dB"
+);
 const amadeus = new Amadeus({
   clientId: process.env.AMADEUS_CLIENT_ID,
   clientSecret: process.env.AMADEUS_CLIENT_SECRET
@@ -267,6 +269,46 @@ exports.changeFlightStatus = async (req, res) => {
     } else {
       await res.status(400).json({ error: "Could not cancel Flight" });
     }
+  } catch (e) {
+    await res.json({ error: e.message });
+  }
+};
+
+exports.confirmFlight = async (req, res) => {
+  try {
+    const { flightId, token, amount } = req.body;
+    return stripe.customers
+      .create({
+        email: token.email,
+        source: token.id
+      })
+      .then(customer => {
+        stripe.charges.create(
+          {
+            amount: amount,
+            currency: "pkr",
+            customer: customer.id
+          },
+          { idempotencyKey: flightId }
+        );
+      })
+      .then(result => {
+        Flights.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(flightId)
+          },
+          {
+            bookingStatus: "Confirmed"
+          }
+        ).then(() => {
+          res.json({
+            result
+          });
+        });
+      })
+      .catch(error => {
+        res.json({ error: "Could not make payment", message: error.message });
+      });
   } catch (e) {
     await res.json({ error: e.message });
   }
