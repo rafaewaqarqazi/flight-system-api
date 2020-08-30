@@ -8,7 +8,8 @@ const {
   getPricing,
   bookFlight,
   getUserTrips,
-  cancelFlight
+  getAllTrips,
+  changeFlightStatus
 } = require("../controllers/flight");
 const upload = require("../upload");
 const { requireSignin } = require("../controllers/auth");
@@ -19,6 +20,7 @@ router.get("/airline", getAirline);
 router.get("/recommended", getRecommended);
 router.get("/pricing", getPricing);
 router.get("/user-trips/:userId", getUserTrips);
+router.get("/all-trips", getAllTrips);
 router.post("/book", bookFlight);
-router.put("/cancel", cancelFlight);
+router.put("/status", changeFlightStatus);
 module.exports = router;

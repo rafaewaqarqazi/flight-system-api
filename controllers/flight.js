@@ -232,15 +232,31 @@ exports.getUserTrips = async (req, res) => {
   }
 };
 
-exports.cancelFlight = async (req, res) => {
+exports.getAllTrips = async (req, res) => {
   try {
-    const { flightId } = req.body;
+    const trips = await Flights.find();
+
+    if (trips) {
+      await res.json({
+        trips
+      });
+    } else {
+      await res.status(400).json({ error: "Could not find trips" });
+    }
+  } catch (e) {
+    await res.json({ error: e.message });
+  }
+};
+
+exports.changeFlightStatus = async (req, res) => {
+  try {
+    const { flightId, status } = req.body;
     const trip = await Flights.findOneAndUpdate(
       {
         _id: mongoose.Types.ObjectId(flightId)
       },
       {
-        bookingStatus: "Canceled"
+        bookingStatus: status
       }
     );
 
