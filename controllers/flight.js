@@ -212,3 +212,46 @@ exports.bookFlight = async (req, res) => {
     await res.json({ error: e.message });
   }
 };
+
+exports.getUserTrips = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const trips = await Flights.find({
+      bookedBy: mongoose.Types.ObjectId(userId)
+    });
+
+    if (trips) {
+      await res.json({
+        trips
+      });
+    } else {
+      await res.status(400).json({ error: "Could not find trips" });
+    }
+  } catch (e) {
+    await res.json({ error: e.message });
+  }
+};
+
+exports.cancelFlight = async (req, res) => {
+  try {
+    const { flightId } = req.body;
+    const trip = await Flights.findOneAndUpdate(
+      {
+        _id: mongoose.Types.ObjectId(flightId)
+      },
+      {
+        bookingStatus: "Canceled"
+      }
+    );
+
+    if (trip) {
+      await res.json({
+        trip
+      });
+    } else {
+      await res.status(400).json({ error: "Could not cancel Flight" });
+    }
+  } catch (e) {
+    await res.json({ error: e.message });
+  }
+};
