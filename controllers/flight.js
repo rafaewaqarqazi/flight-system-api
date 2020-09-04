@@ -1,5 +1,5 @@
-const { airports } = require("../helpers/airports");
 const Flights = require("../models/flights");
+const Deals = require("../models/deals");
 const mongoose = require("mongoose");
 const Amadeus = require("amadeus");
 const stripe = require("stripe")(
@@ -311,5 +311,73 @@ exports.confirmFlight = async (req, res) => {
       });
   } catch (e) {
     await res.json({ error: e.message });
+  }
+};
+
+exports.uploadEditorImage = (req, res) => {
+  res.json({
+    uploaded: true,
+    url: URL.createObjectURL(req.file)
+  });
+};
+
+exports.createWorldTour = async (req, res) => {
+  try {
+    const details = JSON.parse(req.body.details);
+    const deal = await Deals.findOne({ "details.country": details.country });
+    if (deal) {
+      const updatedDeal = await Deals.findOneAndUpdate(
+        { "details.country": details.country },
+        {
+          type: "WorldTour",
+          "details.country": details.country,
+          $push: {
+            "details.packages": {
+              title: details.packageTitle,
+              price: details.packagePrice,
+              description: details.packageDescription,
+              image: req.file.filename
+            }
+          }
+        }
+      );
+      await res.json({
+        success: true,
+        message: `Tour Created Successfully`
+      });
+    } else {
+      const newDeal = await Deals.create({
+        type: "WorldTour",
+        "details.country": details.country,
+
+        "details.packages": {
+          title: details.packageTitle,
+          price: details.packagePrice,
+          description: details.packageDescription,
+          image: req.file.filename
+        }
+      });
+      await res.json({
+        success: true,
+        message: `Tour Created Successfully`
+      });
+    }
+  } catch (error) {
+    console.log("error", error.message);
+    await res.json({ message: error.message });
+  }
+};
+
+exports.getWorldTour = async (req, res) => {
+  try {
+    const deals = await Deals.find({ type: "WorldTour" });
+
+    await res.json({
+      success: true,
+      deals
+    });
+  } catch (error) {
+    console.log("error", error.message);
+    await res.json({ message: error.message });
   }
 };

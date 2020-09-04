@@ -10,7 +10,10 @@ const {
   getUserTrips,
   getAllTrips,
   changeFlightStatus,
-  confirmFlight
+  confirmFlight,
+  uploadEditorImage,
+  createWorldTour,
+  getWorldTour
 } = require("../controllers/flight");
 const upload = require("../upload");
 const { requireSignin } = require("../controllers/auth");
@@ -25,4 +28,11 @@ router.get("/all-trips", getAllTrips);
 router.post("/book", bookFlight);
 router.put("/status", changeFlightStatus);
 router.post("/confirm", confirmFlight);
+router.post(
+  "/world-tour/editorImage/:type",
+  upload.single("upload"),
+  uploadEditorImage
+);
+router.post("/create/world-tour/:type", upload.single("file"), createWorldTour);
+router.get("/world-tour", getWorldTour);
 module.exports = router;
