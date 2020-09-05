@@ -372,9 +372,59 @@ exports.createWorldTour = async (req, res) => {
   }
 };
 
+exports.createUmrahDeals = async (req, res) => {
+  try {
+    const details = JSON.parse(req.body.details);
+    const {
+      packageTitle,
+      numberOfPeople,
+      numberOfDays,
+      packagePrice,
+      packageDescription
+    } = details;
+
+    const newDeal = await Deals.create({
+      type: "UmrahDeals",
+      "details.packages": {
+        _id: mongoose.Types.ObjectId(),
+        title: packageTitle,
+        price: packagePrice,
+        numberOfDays,
+        numberOfPeople,
+        image: req.file.filename,
+        description: packageDescription,
+        bookedBy: []
+      }
+    });
+    await res.json({
+      success: true,
+      message: `Package Created Successfully`
+    });
+  } catch (error) {
+    console.log("error", error.message);
+    await res.json({ message: error.message });
+  }
+};
+
 exports.getWorldTour = async (req, res) => {
   try {
     const deals = await Deals.find({ type: "WorldTour" });
+
+    await res.json({
+      success: true,
+      deals
+    });
+  } catch (error) {
+    console.log("error", error.message);
+    await res.json({ message: error.message });
+  }
+};
+exports.getUmrahDeals = async (req, res) => {
+  try {
+    const deals = await Deals.aggregate([
+      { $match: { type: "UmrahDeals" } },
+      { $unwind: "$details.packages" }
+    ]);
 
     await res.json({
       success: true,
@@ -393,6 +443,24 @@ exports.getWorldTourPackage = async (req, res) => {
       { $match: { type: "WorldTour", "details.country": country } },
       { $unwind: "$details.packages" },
       { $match: { "details.packages._id": mongoose.Types.ObjectId(packageId) } }
+    ]);
+
+    await res.json({
+      success: true,
+      deals
+    });
+  } catch (error) {
+    console.log("error", error.message);
+    await res.json({ message: error.message });
+  }
+};
+
+exports.getUmrahDealPackage = async (req, res) => {
+  try {
+    const { dealId } = req.query;
+    const deals = await Deals.aggregate([
+      { $match: { _id: mongoose.Types.ObjectId(dealId) } },
+      { $unwind: "$details.packages" }
     ]);
 
     await res.json({
@@ -470,6 +538,22 @@ exports.deleteWorldTourPackage = async (req, res) => {
 
       { new: true }
     ).then(deal => {
+      res.json({
+        deal
+      });
+    });
+  } catch (e) {
+    await res.json({ error: e.message });
+  }
+};
+
+exports.deleteUmrahDealPackage = async (req, res) => {
+  try {
+    const { dealId } = req.body;
+
+    Deals.findOneAndRemove({
+      _id: dealId
+    }).then(deal => {
       res.json({
         deal
       });

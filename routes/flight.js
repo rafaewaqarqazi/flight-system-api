@@ -16,7 +16,11 @@ const {
   getWorldTour,
   getWorldTourPackage,
   bookWorldTour,
-  deleteWorldTourPackage
+  deleteWorldTourPackage,
+  createUmrahDeals,
+  getUmrahDeals,
+  getUmrahDealPackage,
+  deleteUmrahDealPackage
 } = require("../controllers/flight");
 const upload = require("../upload");
 const { requireSignin } = require("../controllers/auth");
@@ -37,8 +41,16 @@ router.post(
   uploadEditorImage
 );
 router.post("/create/world-tour/:type", upload.single("file"), createWorldTour);
+router.post(
+  "/create/umrah-deals/:type",
+  upload.single("file"),
+  createUmrahDeals
+);
 router.get("/world-tour", getWorldTour);
+router.get("/umrah-deals", getUmrahDeals);
 router.get("/world-tour/package", getWorldTourPackage);
+router.get("/umrah-deals/package", getUmrahDealPackage);
 router.post("/world-tour/book", bookWorldTour);
 router.put("/world-tour/delete-package", deleteWorldTourPackage);
+router.put("/umrah-deals/delete-package", deleteUmrahDealPackage);
 module.exports = router;
