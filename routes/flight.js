@@ -13,7 +13,10 @@ const {
   confirmFlight,
   uploadEditorImage,
   createWorldTour,
-  getWorldTour
+  getWorldTour,
+  getWorldTourPackage,
+  bookWorldTour,
+  deleteWorldTourPackage
 } = require("../controllers/flight");
 const upload = require("../upload");
 const { requireSignin } = require("../controllers/auth");
@@ -35,4 +38,7 @@ router.post(
 );
 router.post("/create/world-tour/:type", upload.single("file"), createWorldTour);
 router.get("/world-tour", getWorldTour);
+router.get("/world-tour/package", getWorldTourPackage);
+router.post("/world-tour/book", bookWorldTour);
+router.put("/world-tour/delete-package", deleteWorldTourPackage);
 module.exports = router;

@@ -333,10 +333,12 @@ exports.createWorldTour = async (req, res) => {
           "details.country": details.country,
           $push: {
             "details.packages": {
+              _id: mongoose.Types.ObjectId(),
               title: details.packageTitle,
               price: details.packagePrice,
               description: details.packageDescription,
-              image: req.file.filename
+              image: req.file.filename,
+              bookedBy: []
             }
           }
         }
@@ -351,10 +353,12 @@ exports.createWorldTour = async (req, res) => {
         "details.country": details.country,
 
         "details.packages": {
+          _id: mongoose.Types.ObjectId(),
           title: details.packageTitle,
           price: details.packagePrice,
           description: details.packageDescription,
-          image: req.file.filename
+          image: req.file.filename,
+          bookedBy: []
         }
       });
       await res.json({
@@ -379,5 +383,98 @@ exports.getWorldTour = async (req, res) => {
   } catch (error) {
     console.log("error", error.message);
     await res.json({ message: error.message });
+  }
+};
+
+exports.getWorldTourPackage = async (req, res) => {
+  try {
+    const { country, packageId } = req.query;
+    const deals = await Deals.aggregate([
+      { $match: { type: "WorldTour", "details.country": country } },
+      { $unwind: "$details.packages" },
+      { $match: { "details.packages._id": mongoose.Types.ObjectId(packageId) } }
+    ]);
+
+    await res.json({
+      success: true,
+      deals
+    });
+  } catch (error) {
+    console.log("error", error.message);
+    await res.json({ message: error.message });
+  }
+};
+
+exports.bookWorldTour = async (req, res) => {
+  try {
+    const { packageId, userId, dealId, token, amount } = req.body;
+    console.log("req.body", req.body);
+    return stripe.customers
+      .create({
+        email: token.email,
+        source: token.id
+      })
+      .then(customer => {
+        stripe.charges.create(
+          {
+            amount: amount,
+            currency: "pkr",
+            customer: customer.id
+          },
+          { idempotencyKey: packageId }
+        );
+      })
+      .then(result => {
+        Deals.findOneAndUpdate(
+          {
+            _id: dealId,
+            "details.packages._id": mongoose.Types.ObjectId(packageId)
+          },
+          {
+            $addToSet: {
+              "details.packages.$.bookedBy": mongoose.Types.ObjectId(userId)
+            }
+          },
+
+          { new: true }
+        ).then(deal => {
+          res.json({
+            deal
+          });
+        });
+      })
+      .catch(error => {
+        res.json({ error: "Could not make payment", message: error.message });
+      });
+  } catch (e) {
+    await res.json({ error: e.message });
+  }
+};
+
+exports.deleteWorldTourPackage = async (req, res) => {
+  try {
+    const { packageId, dealId } = req.body;
+    console.log("req.body", req.body);
+
+    Deals.findOneAndUpdate(
+      {
+        _id: dealId
+      },
+      {
+        $pull: {
+          "details.packages": {
+            _id: mongoose.Types.ObjectId(packageId)
+          }
+        }
+      },
+
+      { new: true }
+    ).then(deal => {
+      res.json({
+        deal
+      });
+    });
+  } catch (e) {
+    await res.json({ error: e.message });
   }
 };
