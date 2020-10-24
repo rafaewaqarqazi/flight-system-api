@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: "1" },
   resetPasswordLink: String,
   mobileNo: String,
+  passportNo: String,
   admin_details: {},
   profileImage: {
     filename: String

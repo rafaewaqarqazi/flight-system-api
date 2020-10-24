@@ -1,7 +1,9 @@
 const Flights = require("../models/flights");
 const Deals = require("../models/deals");
+const Users = require("../models/users");
 const mongoose = require("mongoose");
 const Amadeus = require("amadeus");
+const { sendEmail } = require("../helpers");
 const stripe = require("stripe")(
   "sk_test_51HLtFDCzlUjqqV4cO1V60KQw15iwJxRaMiFCXVjEtR6GKVig7diKM9JS86ILjg2hI0Ohwam6VLWWjZB9jMhiww9o00TF8pP1dB"
 );
@@ -204,8 +206,18 @@ exports.bookFlight = async (req, res) => {
     });
     const newFlight = await flight.save();
     if (newFlight) {
+      const user = await Users.findById(userId);
+      if (user) {
+        const emailData = {
+          to: user.email,
+          subject: "Flight Booked",
+          html: `<p>Dear ${user.firstName} ${user.lastName}</p><p>Please collect your ticket from your airport after confirmation of booking, ticket id is "${newFlight._id}"</p>`
+        };
+        sendEmail(emailData);
+      }
+
       await res.json({
-        message: `Please collect your ticket from your airport, ticket id is "${newFlight._id}"`
+        message: `Please collect your ticket from your airport after confirmation of booking, ticket id is "${newFlight._id}"`
       });
     } else {
       await res.status(400).json({ error: "Could not book flight" });
@@ -236,7 +248,7 @@ exports.getUserTrips = async (req, res) => {
 
 exports.getAllTrips = async (req, res) => {
   try {
-    const trips = await Flights.find();
+    const trips = await Flights.find().populate("bookedBy");
 
     if (trips) {
       await res.json({
@@ -301,6 +313,12 @@ exports.confirmFlight = async (req, res) => {
             bookingStatus: "Confirmed"
           }
         ).then(() => {
+          const emailData = {
+            to: token.email,
+            subject: "Flight Confirmed",
+            html: `<p>Dear customer,</p><p>Your payment has been made successfully and your flight with id (${flightId}) has been confirmed successfully</p>`
+          };
+          sendEmail(emailData);
           res.json({
             result
           });
@@ -408,7 +426,7 @@ exports.createUmrahDeals = async (req, res) => {
 
 exports.getWorldTour = async (req, res) => {
   try {
-    const deals = await Deals.find({ type: "WorldTour" });
+    const deals = await Deals.find({ type: "WorldTour" }).populate("bookedBy");
 
     await res.json({
       success: true,
@@ -444,10 +462,16 @@ exports.getWorldTourPackage = async (req, res) => {
       { $unwind: "$details.packages" },
       { $match: { "details.packages._id": mongoose.Types.ObjectId(packageId) } }
     ]);
-
+    const result = await Deals.populate(deals, [
+      {
+        path: "details.packages.bookedBy",
+        model: "Users",
+        select: "firstName lastName email mobileNo passportNo"
+      }
+    ]);
     await res.json({
       success: true,
-      deals
+      deals: result
     });
   } catch (error) {
     console.log("error", error.message);
@@ -462,10 +486,16 @@ exports.getUmrahDealPackage = async (req, res) => {
       { $match: { _id: mongoose.Types.ObjectId(dealId) } },
       { $unwind: "$details.packages" }
     ]);
-
+    const result = await Deals.populate(deals, [
+      {
+        path: "details.packages.bookedBy",
+        model: "Users",
+        select: "firstName lastName email mobileNo passportNo"
+      }
+    ]);
     await res.json({
       success: true,
-      deals
+      deals: result
     });
   } catch (error) {
     console.log("error", error.message);

@@ -79,24 +79,13 @@ exports.createAdmin = async (req, res) => {
 };
 exports.editProfile = async (req, res) => {
   try {
-    const { userId, lawSchool, practiceAreas, bio, role, ...body } = req.body;
+    const { userId, ...body } = req.body;
     const userUpdate = await User.findByIdAndUpdate(
       userId,
       {
-        ...body,
-        lawyer_details:
-          role === "2"
-            ? {
-                lawSchool,
-                practiceAreas,
-                bio
-              }
-            : null
+        ...body
       },
       { new: true }
-    ).populate(
-      "lawyer_details.cases.client",
-      "fistName lastName email profileImage"
     );
     if (userUpdate) {
       const {
@@ -105,11 +94,10 @@ exports.editProfile = async (req, res) => {
         lastName,
         email,
         role,
-        client_details,
-        lawyer_details,
         address,
         country,
         mobileNo,
+        passportNo,
         profileImage
       } = userUpdate;
       await res.json({
@@ -121,8 +109,7 @@ exports.editProfile = async (req, res) => {
           lastName,
           email,
           role,
-          client_details,
-          lawyer_details,
+          passportNo,
           address,
           country,
           mobileNo,
@@ -263,8 +250,7 @@ exports.login = (req, res) => {
       lastName,
       email,
       role,
-      client_details,
-      lawyer_details,
+      passportNo,
       address,
       country,
       mobileNo,
@@ -278,8 +264,7 @@ exports.login = (req, res) => {
       firstName,
       lastName,
       role,
-      client_details,
-      lawyer_details,
+      passportNo,
       address,
       country,
       mobileNo,
