@@ -36,7 +36,7 @@ exports.createBlog = async (req, res) => {
 };
 exports.updateBlog = async (req, res) => {
   try {
-    const { title, description, images, blogId } = req.body;
+    const { title, description, images, blogId } = JSON.parse(req.body.details);
     let newImages = images || [];
     req.files.map(file => {
       newImages = [
@@ -81,7 +81,9 @@ exports.removeBlog = async (req, res) => {
 };
 exports.getAllBlogs = async (req, res) => {
   try {
-    const result = await Blogs.find().populate("author");
+    const result = await Blogs.find()
+      .sort("-createdAt")
+      .populate("author");
     await res.json({ blogs: result });
   } catch (e) {
     await res
